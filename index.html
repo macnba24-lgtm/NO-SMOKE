@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4C6852">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NO SMOKE">
+<title>NO SMOKE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single mobile column, max 520px, fixed 5-tab bar at the bottom, floating SOS above it */
+:root{
+  --bg:#EEF0E8; --surface:#FFFFFF; --ivory:#F7F7F1; --ink:#262A28; --muted:#68706A; --line:#DCE0D5;
+  --sage:#7C987F; --sage-deep:#4C6852; --sage-soft:#E1E9DD; --warn:#AE6A4E; --on-sage:#FFFFFF;
+  --gold:#B8963E; --silver:#8E969A; --bronze:#A87452;
+  --shadow:0 1px 2px rgba(38,42,40,.05),0 10px 30px rgba(38,42,40,.06);
+  --display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#171A18; --surface:#212522; --ivory:#1C1F1D; --ink:#ECEFE8; --muted:#A0A8A1; --line:#313732;
+  --sage:#93AE95; --sage-deep:#BBD0BB; --sage-soft:#29322B; --warn:#DB9479; --on-sage:#121512;
+  --gold:#D4B460; --silver:#AEB6BA; --bronze:#C9906C;
+  --shadow:0 1px 0 rgba(255,255,255,.03); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#171A18; --surface:#212522; --ivory:#1C1F1D; --ink:#ECEFE8; --muted:#A0A8A1; --line:#313732;
+  --sage:#93AE95; --sage-deep:#BBD0BB; --sage-soft:#29322B; --warn:#DB9479; --on-sage:#121512;
+  --gold:#D4B460; --silver:#AEB6BA; --bronze:#C9906C;
+  --shadow:0 1px 0 rgba(255,255,255,.03); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.app{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(110px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h2{font-size:22px}
+h3{font-size:16px}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.grow{flex:1;min-width:0}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+.mark{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.14em}
+.mark i{font-style:normal;color:var(--sage)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:12px;font-weight:600;white-space:nowrap}
+.chip .dot{width:8px;height:8px;border-radius:50%}
+
+.card{background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.flat{background:var(--ivory);border-radius:14px;padding:14px;border:1px solid var(--line)}
+
+/* hero timer */
+.hero{background:var(--sage-deep);color:var(--bg);border:none;padding:22px 20px 20px;position:relative;overflow:hidden}
+:root .hero{background:#3F5A45;color:#F3F5EE}
+.hero .label{color:rgba(243,245,238,.7)}
+.timer{font-family:var(--mono);font-weight:500;font-size:clamp(34px,11vw,52px);letter-spacing:-.02em;line-height:1.05;margin-top:8px}
+.timer .d{font-family:var(--display);font-weight:700}
+.timer .u{font-size:.42em;opacity:.7;margin:0 .25em 0 .08em;font-family:var(--body);font-weight:500}
+.hero .sub{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:rgba(243,245,238,.82)}
+.hero .ring{position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;border:1px solid rgba(243,245,238,.12)}
+.hero .ring2{position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;border:1px solid rgba(243,245,238,.1)}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px 12px;font-weight:600;font-size:15px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn small{font-weight:500;font-size:12px;color:var(--muted)}
+.btn.primary{background:var(--sage);border-color:var(--sage);color:var(--on-sage)}
+.btn.primary small{color:var(--on-sage);opacity:.8}
+.btn.plain{flex-direction:row;align-items:center;justify-content:center;padding:12px 14px}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn.sm{padding:9px 12px;font-size:13px;border-radius:11px;flex-direction:row;align-items:center}
+.btn.dark{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.linkbtn{background:none;border:none;color:var(--sage-deep);font-weight:600;padding:4px 0;font-size:13px}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+.kpi .v{font-family:var(--display);font-weight:700;font-size:24px;margin-top:2px}
+.kpi .v small{font-size:13px;font-family:var(--body);color:var(--muted);font-weight:500}
+
+.bar{height:8px;border-radius:99px;background:var(--sage-soft);overflow:hidden}
+.bar > span{display:block;height:100%;background:var(--sage);border-radius:99px;transition:width .4s}
+
+/* list rows */
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.li:first-child{border-top:none}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:700;font-size:15px;flex:none}
+.rank{width:22px;font-family:var(--mono);font-size:13px;color:var(--muted);text-align:center;flex:none}
+.me{background:var(--sage-soft);border-radius:12px;padding-left:8px;padding-right:8px;margin:0 -8px;border-top-color:transparent}
+.me + .li{border-top-color:transparent}
+.xp{font-family:var(--mono);font-size:14px;font-weight:500}
+
+/* league pill */
+.lg{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;border:1px solid currentColor}
+.lg-Bronze{color:var(--bronze)} .lg-Silver{color:var(--silver)} .lg-Gold{color:var(--gold)}
+.lg-Platinum{color:var(--sage)} .lg-Diamond{color:var(--sage-deep)}
+
+/* missions */
+.mis{display:flex;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}
+.mis:first-child{border-top:none}
+.check{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;flex:none;font-size:13px}
+.check.ok{background:var(--sage);border-color:var(--sage);color:var(--on-sage)}
+.mis .bar{height:5px;margin-top:6px}
+.claim{background:var(--sage);color:var(--on-sage);border:none;border-radius:10px;padding:8px 11px;font-weight:700;font-size:12px;white-space:nowrap}
+.xptag{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs nav{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tabs a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 10px;text-decoration:none;color:var(--muted);font-size:11px;font-weight:600}
+.tabs a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tabs a[aria-current="page"]{color:var(--sage-deep)}
+.sosfab{position:fixed;z-index:21;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:12px 16px;font-weight:700;letter-spacing:.08em;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+
+/* toast */
+.toast{position:fixed;z-index:40;left:50%;transform:translateX(-50%);bottom:calc(138px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:11px 14px;border-radius:12px;font-size:14px;font-weight:500;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.toast button{background:none;border:none;color:var(--sage-soft);font-weight:700;padding:0}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.modal .app{padding-bottom:40px}
+.breath{width:200px;height:200px;margin:12px auto 6px;position:relative;display:grid;place-items:center}
+.breath .c{position:absolute;inset:0;border-radius:50%;background:var(--sage-soft);transform:scale(.55)}
+.breath .c2{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--sage);transform:scale(.55)}
+.breath span{position:relative;font-family:var(--display);font-weight:700;font-size:20px}
+.breath.in .c,.breath.in .c2{transform:scale(1);transition:transform 4s ease-in-out}
+.breath.hold .c,.breath.hold .c2{transform:scale(1)}
+.breath.out .c,.breath.out .c2{transform:scale(.55);transition:transform 6s ease-in-out}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:600}
+.input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 13px;font-size:16px}
+.input:focus{outline:2px solid var(--sage);outline-offset:0;border-color:transparent}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:34px;height:34px;border-radius:50%;border:3px solid transparent;padding:0}
+.sw[aria-pressed="true"]{border-color:var(--ink)}
+.seg{display:flex;background:var(--ivory);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{flex:1;border:none;background:none;padding:8px 6px;border-radius:9px;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* badges */
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px}
+.bdg{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:11px;font-weight:600;line-height:1.2}
+.hex{width:54px;height:58px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--sage);color:var(--on-sage);font-family:var(--display);font-weight:700;font-size:15px}
+.bdg.off .hex{background:var(--line);color:var(--muted)}
+.bdg.off{color:var(--muted)}
+.medal{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:13px;color:#fff}
+
+/* timeline */
+.tl{display:flex;flex-direction:column}
+.tli{display:grid;grid-template-columns:20px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.tli::before{content:"";position:absolute;left:9px;top:20px;bottom:0;width:2px;background:var(--line)}
+.tli:last-child::before{display:none}
+.tli .pt{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);background:var(--surface);margin-top:1px}
+.tli.done .pt{background:var(--sage);border-color:var(--sage)}
+.tli.next .pt{border-color:var(--sage)}
+.tli .when{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.tli.done .when{color:var(--sage-deep)}
+
+/* chart */
+.chart svg{width:100%;height:auto;display:block}
+.chart .b{fill:var(--sage)}
+.chart .b.over{fill:var(--warn)}
+.chart .hl{stroke:var(--ink);stroke-dasharray:4 4;stroke-width:1.2;opacity:.55}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart text{fill:var(--muted);font-family:var(--mono);font-size:10px}
+.chart .vt{fill:var(--ink);font-size:10px}
+
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end;text-align:center}
+.pod{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pod .blk{width:100%;border-radius:10px 10px 4px 4px;background:var(--sage-soft);display:grid;place-items:center;font-family:var(--display);font-weight:700}
+.center{text-align:center}
+.empty{padding:28px 6px;text-align:center;color:var(--muted)}
+.pop{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+.float{position:fixed;z-index:45;font-family:var(--mono);font-weight:500;color:var(--sage-deep);pointer-events:none;animation:up 1s ease forwards}
+@keyframes up{to{transform:translateY(-40px);opacity:0}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+
+</head>
+<body>
+<div class="app" id="root">
+  <div class="top"><div class="mark">NO <i>SMOKE</i></div></div>
+  <div class="card empty" id="boot">Sto caricando i tuoi progressi…</div>
+</div>
+<div class="tabs" id="tabs" hidden></div>
+<button class="sosfab" id="sosfab" data-act="sos" hidden>SOS</button>
+<div id="modal"></div>
+<div id="toastwrap"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ====== INCOLLA QUI la configurazione della tua app web Firebase ====== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA_nsExERT0cdBTfaFvJuPjL2ttaoFKM2w",
+  authDomain: "no-smoke69.firebaseapp.com",
+  projectId: "no-smoke69",
+  storageBucket: "no-smoke69.firebasestorage.app",
+  messagingSenderId: "59416321686",
+  appId: "1:59416321686:web:b2f5e91acd786840b16cb7",
+  measurementId: "G-S63L35HBBR"
+};
+</script>
+<script>
+(() => {
+"use strict";
+const H = 3600e3, D = 86400e3, MIN = 60e3;
+const COLORS = ["#7C987F","#6E8EA5","#B0895A","#977CA0","#A8766C","#5B8B85"];
+const LEAGUES = [["Bronze",0],["Silver",400],["Gold",1200],["Platinum",2500],["Diamond",4500]];
+const SEASON_DAYS = 30;
+
+const S = { db:null, user:null, pid:null, player:null, loaded:false, fatal:null, readOnly:false,
+  group:null, members:[], groupCode:null, unsubG:null, unsubM:null,
+  tab:"home", statMode:"giorni", pendingRender:false, sos:null };
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+function dk(t){ const d=new Date(t); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function dayStart(t){ const d=new Date(t); d.setHours(0,0,0,0); return d.getTime(); }
+function keyStart(k){ const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d).getTime(); }
+function addDays(t,n){ const d=new Date(t); d.setDate(d.getDate()+n); return d.getTime(); }
+function weekStart(t){ const d=new Date(dayStart(t)); const wd=(d.getDay()+6)%7; d.setDate(d.getDate()-wd); return d.getTime(); }
+function weekKey(t){ const d=new Date(dayStart(t)); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4);
+  const w = 1+Math.round(((d-w1)/D-3+((w1.getDay()+6)%7))/7); return d.getFullYear()+"-W"+pad(w); }
+const eur = v => (v||0).toLocaleString("it-IT",{style:"currency",currency:"EUR"});
+const fmtInt = v => Math.round(v||0).toLocaleString("it-IT");
+function shortDur(ms){ ms=Math.max(0,ms); const d=Math.floor(ms/D), h=Math.floor(ms%D/H), m=Math.floor(ms%H/MIN);
+  if(d) return d+"g "+h+"h"; if(h) return h+"h "+m+"m"; return m+"m"; }
+function timerHTML(ms){ ms=Math.max(0,ms); const d=Math.floor(ms/D), h=Math.floor(ms%D/H), m=Math.floor(ms%H/MIN), s=Math.floor(ms%MIN/1000);
+  return (d?`<span class="d">${d}</span><span class="u">g</span>`:"")+`${pad(h)}:${pad(m)}:${pad(s)}`; }
+function hashStr(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
+function pick(arr,n,seed){ const a=arr.slice(); let x=hashStr(seed); const out=[];
+  while(out.length<n && a.length){ x=(Math.imul(x,1103515245)+12345)>>>0; out.push(a.splice(x%a.length,1)[0]); } return out; }
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function genId(n=16){ const a="abcdefghijkmnpqrstuvwxyz23456789"; let s=""; const r=crypto.getRandomValues(new Uint32Array(n)); for(const x of r) s+=a[x%a.length]; return s; }
+function genCode(){ const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s=""; const r=crypto.getRandomValues(new Uint32Array(6)); for(const x of r) s+=a[x%a.length]; return s; }
+const clone = o => JSON.parse(JSON.stringify(o));
+function day(p,k){ p.d = p.d||{}; if(!p.d[k]) p.d[k]={s:0,c:0,o:0,x:0}; return p.d[k]; }
+function dget(p,k){ return (p.d&&p.d[k]) || {s:0,c:0,o:0,x:0}; }
+function levelOf(xp){ return Math.floor((1+Math.sqrt(1+0.08*Math.max(0,xp)))/2); }
+const levelXp = L => 50*L*(L-1);
+function league(x){ let r=LEAGUES[0]; for(const l of LEAGUES) if(x>=l[1]) r=l; return r[0]; }
+function nextLeague(x){ for(const l of LEAGUES) if(x<l[1]) return l; return null; }
+
+/* ---------- derived stats ---------- */
+function stats(p, now=Date.now()){
+  const streak = Math.max(0, now - p.last);
+  const best = Math.max(p.best||0, streak);
+  let smoked=0, cravings=0, sos=0;
+  for(const k in (p.d||{})){ const e=p.d[k]; smoked+=e.s||0; cravings+=e.c||0; sos+=e.o||0; }
+  const expected = p.perDay * Math.max(0, now - p.start)/D;
+  const avoided = Math.max(0, Math.floor(expected - smoked));
+  const perCig = (p.price||0)/(p.perPack||20);
+  const saved = avoided*perCig;
+  const pending = Math.floor(streak/H)*10;
+  const xp = (p.xp||0) + pending;
+  let zeroDays=0, underDays=0, bestDay=null;
+  for(let t=addDays(dayStart(p.start),1), i=0; t<dayStart(now) && i<800; t=addDays(t,1), i++){
+    const s=dget(p,dk(t)).s; if(s===0) zeroDays++; if(s<p.perDay) underDays++; if(bestDay===null||s<bestDay) bestDay=s; }
+  return { streak,best,smoked,cravings,sos,avoided,saved,perCig,pending,xp,zeroDays,underDays,bestDay,
+    missions:(p.mdone||0)+(p.wdone||0)+(p.sdone||0), today:dget(p,dk(now)) };
+}
+function seasonOf(p, g, now=Date.now()){
+  if(g && g.season){ const start=g.season.start, end=addDays(start,SEASON_DAYS);
+    return {n:g.season.n, start, end, day:Math.min(SEASON_DAYS, Math.floor((now-start)/D)+1), ended: now>=end, group:true}; }
+  const base=dayStart(p.start); const idx=Math.max(0,Math.floor((now-base)/(SEASON_DAYS*D)));
+  const start=addDays(base, idx*SEASON_DAYS);
+  return {n:idx+1, start, end:addDays(start,SEASON_DAYS), day:Math.floor((now-start)/D)+1, ended:false, group:false};
+}
+function seasonStats(p, se, now=Date.now()){
+  const to=Math.min(now, se.end), from=Math.max(p.start, se.start);
+  let x=0, s=0, c=0, zero=0, under=0, m=0;
+  for(const k in (p.d||{})){ const t=keyStart(k); if(t>=dayStart(se.start) && t<se.end){ const e=p.d[k]; x+=e.x||0; s+=e.s||0; c+=e.c||0; m+=e.m||0; } }
+  const a=Math.max(p.last, se.start), b=to; if(b>a) x+=Math.floor((b-a)/H)*10;
+  const avoided = to>from ? Math.max(0, Math.floor(p.perDay*(to-from)/D - s)) : 0;
+  for(let t=addDays(dayStart(Math.max(p.start,se.start)),1), i=0; t<dayStart(to) && i<40; t=addDays(t,1), i++) { const q=dget(p,dk(t)).s; if(q===0) zero++; if(q<p.perDay) under++; }
+  return {xp:Math.max(0,x), smoked:s, cravings:c, avoided, zero, under, m};
+}
+
+/* ---------- missions ---------- */
+const hourOf = t => new Date(t).getHours();
+function ctx(p, now=Date.now()){
+  const tk=dk(now), yk=dk(addDays(dayStart(now),-1)), k2=dk(addDays(dayStart(now),-2));
+  const yOk = p.start < dayStart(now), y2Ok = p.start < addDays(dayStart(now),-1);
+  return {p, now, today:dget(p,tk), yest:dget(p,yk), d2:dget(p,k2), yOk, y2Ok, streak:now-p.last, hour:new Date(now).getHours(), tk, yk};
+}
+const freeBefore = (e,h) => !e.s || (e.f && hourOf(e.f)>=h);
+const DAILY = [
+  {id:"r2", t:"Supera 2 voglie", xp:40, chk:x=>[Math.min(x.today.c,2),2]},
+  {id:"r4", t:"Supera 4 voglie", xp:60, chk:x=>[Math.min(x.today.c,4),4]},
+  {id:"r6", t:"Supera 6 voglie", xp:90, chk:x=>[Math.min(x.today.c,6),6]},
+  {id:"f3", t:"Resta 3 ore di fila senza fumare", xp:25, chk:x=>[Math.min(Math.floor(x.streak/H),3),3]},
+  {id:"f6", t:"Resta 6 ore di fila senza fumare", xp:50, chk:x=>[Math.min(Math.floor(x.streak/H),6),6]},
+  {id:"f12", t:"Resta 12 ore di fila senza fumare", xp:80, chk:x=>[Math.min(Math.floor(x.streak/H),12),12]},
+  {id:"f24", t:"Resta 24 ore di fila senza fumare", xp:130, chk:x=>[Math.min(Math.floor(x.streak/H),24),24]},
+  {id:"sos", t:"Apri l'SOS quando arriva una voglia", xp:25, chk:x=>[Math.min(x.today.o,1),1]},
+  {id:"sosr", t:"Usa l'SOS e supera la voglia", xp:35, chk:x=>[x.today.o>=1 && x.today.c>=1 ? 1:0,1]},
+  {id:"late", t:"Prima sigaretta dopo le 10 (si riscatta dalle 10)", xp:40, chk:x=>[x.hour>=10 && freeBefore(x.today,10) ? 1:0,1]},
+  {id:"noon", t:"Mattina pulita: niente fino alle 12 (si riscatta dalle 12)", xp:60, chk:x=>[x.hour>=12 && freeBefore(x.today,12) ? 1:0,1]},
+  {id:"yu", t:"Ieri hai fumato meno del tuo solito", xp:40, chk:x=>[x.yOk && x.yest.s < x.p.perDay ? 1:0,1]},
+  {id:"ym", t:"Ieri meno dell'altro ieri", xp:45, chk:x=>[x.y2Ok && x.yest.s < x.d2.s ? 1:0,1]},
+  {id:"yz", t:"Ieri zero sigarette", xp:90, chk:x=>[x.yOk && x.yest.s===0 ? 1:0,1]},
+  {id:"half", t:"Oggi al massimo metà del tuo solito (si riscatta dalle 20)", xp:50, chk:x=>[x.hour>=20 && x.today.s<=Math.floor(x.p.perDay/2) ? 1:0,1]},
+];
+const WEEKLY = [
+  {id:"wc", t:"Supera 12 voglie questa settimana", xp:150, chk:w=>[Math.min(w.c,12),12]},
+  {id:"wc25", t:"Supera 25 voglie questa settimana", xp:260, chk:w=>[Math.min(w.c,25),25]},
+  {id:"wd", t:"4 giorni sotto il tuo solito", xp:150, chk:w=>[Math.min(w.under,4),4]},
+  {id:"wd6", t:"6 giorni sotto il tuo solito", xp:260, chk:w=>[Math.min(w.under,6),6]},
+  {id:"w48", t:"48 ore di fila senza fumare", xp:220, chk:w=>[Math.min(Math.floor(w.streak/H),48),48]},
+  {id:"w72", t:"72 ore di fila senza fumare", xp:320, chk:w=>[Math.min(Math.floor(w.streak/H),72),72]},
+  {id:"wz", t:"2 giorni a zero sigarette", xp:220, chk:w=>[Math.min(w.zero,2),2]},
+  {id:"wm", t:"Completa 8 missioni giornaliere", xp:150, chk:w=>[Math.min(w.m,8),8]},
+  {id:"wsos", t:"Usa l'SOS 5 volte", xp:120, chk:w=>[Math.min(w.o,5),5]},
+  {id:"wlow", t:"Fuma meno della settimana scorsa negli stessi giorni (da giovedì)", xp:180, chk:w=>[w.days>=4 && w.s < w.prevS ? 1:0,1]},
+  {id:"wf", t:"Completa 3 sfide lampo", xp:160, chk:w=>[Math.min(w.f,3),3]},
+];
+const SEASONAL = [
+  {id:"sc", t:"60 voglie superate in stagione", xp:400, chk:s=>[Math.min(s.cravings,60),60]},
+  {id:"su", t:"15 giorni sotto il tuo solito", xp:400, chk:s=>[Math.min(s.under,15),15]},
+  {id:"sz", t:"5 giorni a zero sigarette", xp:500, chk:s=>[Math.min(s.zero,5),5]},
+  {id:"sm", t:"40 missioni giornaliere", xp:400, chk:s=>[Math.min(s.m,40),40]},
+  {id:"ss", t:"7 giorni di fila senza fumare", xp:700, chk:s=>[Math.min(Math.floor(s.streak/D),7),7]},
+  {id:"sa", t:"Evita 150 sigarette", xp:450, chk:s=>[Math.min(s.avoided,150),150]},
+];
+function withState(p, m, a, b, key){ return {...m, prog:a, need:b, done:a>=b, claimed:!!(p.claims||{})[key], key}; }
+function dailyMissions(p, now=Date.now()){
+  const x=ctx(p,now); const list=pick(DAILY,4,"d"+x.tk);
+  if(p.goal!=null) list.push({id:"goal", t:`Ieri entro il tuo obiettivo (max ${p.goal} al giorno)`, xp:30, chk:x=>[x.yOk && x.yest.s<=p.goal ? 1:0,1]});
+  return list.map(m=>{ const [a,b]=m.chk(x); return withState(p,m,a,b,"d"+x.tk+"_"+m.id); });
+}
+function perfectDay(p, dm, now=Date.now()){
+  const tk=dk(now), key="p"+tk, n=dm.filter(m=>m.claimed).length;
+  return {id:"perf", t:"Giornata perfetta: riscatta tutte le missioni di oggi", xp:60, prog:n, need:dm.length, done:n>=dm.length, claimed:!!(p.claims||{})[key], key};
+}
+function weekCtx(p, now=Date.now()){
+  const ws=weekStart(now), today=dayStart(now); let c=0, under=0, zero=0, m=0, o=0, s=0, prevS=0, days=0, f=0;
+  for(let t=ws; t<=today; t=addDays(t,1)){ const k=dk(t), e=dget(p,k); c+=e.c||0; o+=e.o||0; s+=e.s||0; m+=e.m||0; f+=e.fl||0; days++;
+    prevS+=dget(p,dk(addDays(t,-7))).s||0;
+    if(t<today && t>=dayStart(p.start)){ if(e.s<p.perDay) under++; if(e.s===0) zero++; } }
+  return {c, under, zero, m, o, s, prevS, days, f, streak:now-p.last};
+}
+function weeklyMissions(p, now=Date.now()){
+  const wk=weekKey(now), w=weekCtx(p,now);
+  return pick(WEEKLY,4,"w"+wk).map(m=>{ const [a,b]=m.chk(w); return withState(p,m,a,b,"w"+wk+"_"+m.id); });
+}
+function seasonMissions(p, g, now=Date.now()){
+  const se=seasonOf(p,g,now), ss=seasonStats(p,se,now); ss.streak=Math.max(0,Math.min(now,se.end)-Math.max(p.last,se.start));
+  const tag=(g?g.code:"solo")+se.n;
+  return {se, list:pick(SEASONAL,3,"s"+tag).map(m=>{ const [a,b]=m.chk(ss); return withState(p,m,a,b,"s"+tag+"_"+m.id); })};
+}
+function teamChallenge(p, members, now=Date.now()){
+  const yk=dk(addDays(dayStart(now),-1)), tk=dk(now);
+  const eligible=members.filter(m=>m.start < dayStart(now));
+  const yAll = eligible.length>=2 && eligible.every(m=>dget(m,yk).s < m.perDay);
+  const todayOk = members.map(m=>({m, ok:dget(m,tk).s < m.perDay}));
+  const key="g"+yk;
+  return {yAll, eligible:eligible.length, todayOk, key, claimed:!!(p.claims||{})[key], xp:60};
+}
+
+/* ---------- sfida lampo ---------- */
+const FLASH = [[2,25],[4,55],[8,120],[12,200]];
+function flashState(p, now=Date.now()){
+  const f=p.flash; if(!f) return null;
+  const end=f.start+f.h*H, broken=p.last>f.start;
+  return {...f, end, broken, done:!broken && now>=end, left:end-now, pct:Math.min(100,Math.max(0,(now-f.start)/(f.h*H)*100))};
+}
+
+/* ---------- duello del giorno ---------- */
+const DUEL_METRICS = [
+  {id:"c", t:"Chi supera più voglie", val:e=>e.c||0, fmt:v=>v+" voglie"},
+  {id:"r", t:"Chi resta più sotto il proprio solito", val:(e,m)=>Math.round((1-(e.s||0)/Math.max(1,m.perDay))*100), fmt:v=>v+"%"},
+  {id:"x", t:"Chi fa più XP nella giornata", val:e=>e.x||0, fmt:v=>v+" XP"},
+];
+function duelFor(pid, members, t){
+  const k=dk(t), elig=members.filter(m=>m.start < addDays(dayStart(t),1)).map(m=>m.id).sort();
+  if(elig.length<2 || !elig.includes(pid)) return null;
+  const order=pick(elig, elig.length, "u"+k); const i=order.indexOf(pid);
+  let opp = i%2===0 ? order[i+1] : order[i-1]; if(opp===undefined) opp=order[0]===pid?order[1]:order[0];
+  const metric=DUEL_METRICS[hashStr("m"+k)%DUEL_METRICS.length];
+  const me=members.find(m=>m.id===pid), op=members.find(m=>m.id===opp);
+  return {k, metric, me, op, a:metric.val(dget(me,k),me), b:metric.val(dget(op,k),op)};
+}
+function duels(p, members, now=Date.now()){
+  const today=duelFor(S.pid, members, now), y=duelFor(S.pid, members, addDays(dayStart(now),-1));
+  const yWin = y && y.a>=y.b && (y.a>0 || y.metric.id==="r");
+  const key=y?"u"+y.k:null;
+  return {today, y, yWin, key, claimed:key?!!(p.claims||{})[key]:false, xp:50};
+}
+
+/* ---------- badges ---------- */
+const BADGES = [
+  {id:"start", n:"Primo passo", s:"1", d:"Hai iniziato", c:()=>true},
+  {id:"h24", n:"24 ore", s:"24h", d:"Un giorno senza fumare", c:s=>s.best>=D},
+  {id:"d3", n:"Tre giorni", s:"3g", d:"72 ore di fila", c:s=>s.best>=3*D},
+  {id:"d7", n:"Settimana", s:"7g", d:"7 giorni di fila", c:s=>s.best>=7*D},
+  {id:"d14", n:"Due settimane", s:"14g", d:"14 giorni di fila", c:s=>s.best>=14*D},
+  {id:"d30", n:"Un mese", s:"30g", d:"30 giorni di fila", c:s=>s.best>=30*D},
+  {id:"d90", n:"Tre mesi", s:"90g", d:"90 giorni di fila", c:s=>s.best>=90*D},
+  {id:"c10", n:"Dieci no", s:"10", d:"10 voglie superate", c:s=>s.cravings>=10},
+  {id:"c50", n:"Cinquanta no", s:"50", d:"50 voglie superate", c:s=>s.cravings>=50},
+  {id:"c200", n:"Muro", s:"200", d:"200 voglie superate", c:s=>s.cravings>=200},
+  {id:"e10", n:"Primi 10 €", s:"10€", d:"10 € risparmiati", c:s=>s.saved>=10},
+  {id:"e50", n:"50 €", s:"50€", d:"50 € risparmiati", c:s=>s.saved>=50},
+  {id:"e100", n:"100 €", s:"100€", d:"100 € risparmiati", c:s=>s.saved>=100},
+  {id:"e500", n:"500 €", s:"500€", d:"500 € risparmiati", c:s=>s.saved>=500},
+  {id:"m10", n:"Missionario", s:"M10", d:"10 missioni completate", c:s=>s.missions>=10},
+  {id:"m50", n:"Instancabile", s:"M50", d:"50 missioni completate", c:s=>s.missions>=50},
+  {id:"team", n:"In squadra", s:"SQ", d:"Sei entrato in una squadra", c:(s,p)=>!!p.group},
+  {id:"sos5", n:"Mani libere", s:"SOS", d:"SOS usato 5 volte", c:s=>s.sos>=5},
+  {id:"flash5", n:"Fulmine", s:"⚡5", d:"5 sfide lampo completate", c:(s,p)=>(p.flashDone||0)>=5},
+  {id:"perf7", n:"Perfezionista", s:"P7", d:"7 giornate perfette", c:(s,p)=>(p.perfect||0)>=7},
+  {id:"duel5", n:"Duellante", s:"D5", d:"5 duelli vinti", c:(s,p)=>(p.duelW||0)>=5},
+  {id:"wish", n:"Desiderio", s:"★", d:"Hai risparmiato il tuo desiderio", c:(s,p)=>!!(p.wish && p.wish.cost>0 && s.saved>=p.wish.cost)},
+];
+function awardBadges(p, now=Date.now()){
+  const st=stats(p,now); p.badges=p.badges||{}; const fresh=[];
+  for(const b of BADGES){ if(!p.badges[b.id] && b.c(st,p)){ p.badges[b.id]=now; if(b.id!=="start"){ p.xp=(p.xp||0)+100; day(p,dk(now)).x+=100; } fresh.push(b); } }
+  return fresh;
+}
+
+const HEALTH = [
+  [20*MIN,"20 min","Battito e pressione iniziano a scendere"],
+  [12*H,"12 ore","Il monossido di carbonio nel sangue torna a livelli normali"],
+  [48*H,"48 ore","Gusto e olfatto cominciano a migliorare"],
+  [72*H,"72 ore","Respirare diventa più facile, i bronchi si rilassano"],
+  [14*D,"2 settimane","Circolazione e funzione polmonare migliorano"],
+  [30*D,"1 mese","Meno tosse e meno fiato corto"],
+  [365*D,"1 anno","Il rischio di malattia coronarica è circa la metà"],
+  [5*365*D,"5 anni","Il rischio di ictus si avvicina a quello di chi non fuma"],
+  [10*365*D,"10 anni","Il rischio di tumore al polmone è circa la metà"],
+];
+
+/* ---------- persistence ---------- */
+let wq = Promise.resolve();
+function pruneClaims(p, now){
+  const lim=dk(addDays(dayStart(now),-15)); const c=p.claims||{};
+  for(const k in c){ if("dgpu".includes(k[0]) && k.slice(1,11)<lim) delete c[k]; }
+}
+function persist(doc){
+  if(S.readOnly){ toast("Non riesco a salvare: controlla la connessione e le regole di Firebase."); return; }
+  const ref=S.db.doc("players/"+S.pid); const body=clone(doc);
+  wq = wq.then(()=>ref.set(body)).catch(e=>{
+    if(e && (e.code==="permission-denied")){ S.readOnly=true; toast("Non riesco a salvare: controlla la connessione e le regole di Firebase."); }
+    else if(e && e.code==="quota_exceeded") toast("Spazio dati esaurito.");
+    else toast("Salvataggio non riuscito, riprova tra poco.");
+  });
+  return wq;
+}
+function mutate(fn, opts={}){
+  if(!S.player) return;
+  const now=Date.now(); const before=clone(S.player); const p=clone(S.player);
+  const lvBefore=levelOf(stats(before,now).xp);
+  fn(p, now);
+  const fresh=awardBadges(p, now);
+  pruneClaims(p, now);
+  S.player=p; persist(p); render();
+  const lvAfter=levelOf(stats(p,now).xp);
+  const note = fresh.length ? "Nuovo badge: "+fresh.map(b=>b.n).join(", ") : (lvAfter>lvBefore ? "Livello "+lvAfter+" raggiunto" : null);
+  S.note=note; if(note && !opts.toast) toast(note);
+  return before;
+}
+function undoable(before, msg){
+  if(!before) return; const note=S.note; S.note=null;
+  toast(msg+(note?" · "+note:""), {label:"Annulla", fn:()=>{ S.player=before; persist(before); watchGroup(before.group); render(); toast("Annullato"); }}, 7000);
+}
+
+/* ---------- actions ---------- */
+function floatXP(text, el){
+  if(!el) return; const r=el.getBoundingClientRect(); const f=document.createElement("div");
+  f.className="float"; f.textContent=text; f.style.left=(r.left+r.width/2-20)+"px"; f.style.top=(r.top-6)+"px";
+  document.body.appendChild(f); setTimeout(()=>f.remove(),1000);
+}
+function penaltyFor(p,n){ return n>(p.goal??p.perDay) ? 25 : 10; }
+function smoke(btn){
+  const before=mutate((p,now)=>{
+    const interval=Math.max(0,now-p.last), hours=Math.floor(interval/H), gain=hours*10;
+    p.best=Math.max(p.best||0, interval); p.freeH=(p.freeH||0)+hours; p.xp=(p.xp||0)+gain;
+    const e=day(p,dk(now)); if(!e.f) e.f=now; e.s++; e.x+=gain; p.last=now;
+    const pen=penaltyFor(p,e.s); p.xp=Math.max(0,(p.xp||0)-pen); e.x-=pen; p.penTot=(p.penTot||0)+pen;
+  }, {toast:true});
+  if(!before) return;
+  const pen=penaltyFor(S.player, dget(S.player,dk(Date.now())).s);
+  undoable(before, "−"+pen+" XP. Il cronometro riparte, badge e record restano.");
+}
+function resist(btn){
+  const before=mutate((p,now)=>{ const e=day(p,dk(now)); e.c++; if(e.c<=10){ e.x+=15; p.xp=(p.xp||0)+15; } }, {toast:true});
+  const e=dget(S.player,dk(Date.now()));
+  floatXP(e.c<=10?"+15 XP":"Grande", btn); if(btn){ btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop"); }
+  undoable(before, ["Voglia superata. Una in meno.","Fatto. Il corpo ringrazia.","Ottimo, continua così.","Un altro no. Conta."][e.c%4]);
+}
+function claim(key, xp, kind, btn){
+  if((S.player.claims||{})[key]) return;
+  const before=mutate((p,now)=>{ p.claims=p.claims||{}; p.claims[key]=now; p.xp=(p.xp||0)+xp; day(p,dk(now)).x+=xp;
+    if(kind==="d"){ p.mdone=(p.mdone||0)+1; const e=day(p,dk(now)); e.m=(e.m||0)+1; } if(kind==="w") p.wdone=(p.wdone||0)+1; if(kind==="p") p.perfect=(p.perfect||0)+1; if(kind==="u") p.duelW=(p.duelW||0)+1; if(kind==="s") p.sdone=(p.sdone||0)+1; }, {toast:true});
+  floatXP("+"+xp+" XP", btn); undoable(before, "Completata · +"+xp+" XP");
+}
+
+/* ---------- toast ---------- */
+let toastT=null;
+function toast(msg, action, ms=3200){
+  const w=$("#toastwrap"); clearTimeout(toastT);
+  w.innerHTML=`<div class="toast" role="status"><span>${esc(msg)}</span>${action?`<button id="toastAct">${esc(action.label)}</button>`:""}</div>`;
+  if(action) $("#toastAct").onclick=()=>{ w.innerHTML=""; action.fn(); };
+  toastT=setTimeout(()=>{ w.innerHTML=""; }, ms);
+}
+
+/* ---------- views ---------- */
+function avatar(m, size){ const st=size?`width:${size}px;height:${size}px;font-size:${Math.round(size*.42)}px;`:""; return `<div class="av" style="${st}background:${COLORS.includes(m.color)?m.color:COLORS[0]}">${esc((m.nick||"?").trim().charAt(0).toUpperCase())}</div>`; }
+function lgPill(x){ const l=league(x); return `<span class="lg lg-${l}">${l}</span>`; }
+function topBar(){
+  const p=S.player; if(!p) return `<div class="top"><div class="mark">NO <i>SMOKE</i></div></div>`;
+  const st=stats(p); const se=seasonOf(p,S.group); const sx=seasonStats(p,se).xp;
+  return `<div class="top"><div class="mark">NO <i>SMOKE</i></div><div class="row"><span class="chip num">Lv ${levelOf(st.xp)}</span>${lgPill(sx)}</div></div>`;
+}
+
+function viewHome(){
+  const p=S.player, now=Date.now(), st=stats(p,now), lv=levelOf(st.xp);
+  const a=levelXp(lv), b=levelXp(lv+1), pct=Math.round((st.xp-a)/(b-a)*100);
+  const next=HEALTH.find(h=>st.streak<h[0]); const prev=[...HEALTH].reverse().find(h=>st.streak>=h[0]);
+  const prevT=prev?prev[0]:0; const hp=next?Math.round((st.streak-prevT)/(next[0]-prevT)*100):100;
+  const todayS=st.today.s, limit=p.goal||p.perDay;
+  const wish=p.wish && p.wish.cost>0 ? `<div class="card stack"><div class="row between"><div><div class="label">Il tuo desiderio</div><h3 style="margin-top:4px">${esc(p.wish.name)}</h3></div><div class="num small muted">${eur(Math.min(st.saved,p.wish.cost))} / ${eur(p.wish.cost)}</div></div><div class="bar"><span style="width:${Math.min(100,st.saved/p.wish.cost*100)}%"></span></div></div>`:"";
+  return `
+  <div class="stack">
+    <div class="card hero"><div class="ring"></div><div class="ring2"></div>
+      <div class="label">Senza fumare da</div>
+      <div class="timer num" data-tick="timer">${timerHTML(st.streak)}</div>
+      <div class="sub"><span>Record <b class="num" data-tick="best">${shortDur(st.best)}</b></span><span>+<b class="num" data-tick="pend">${st.pending}</b> XP in arrivo</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" data-act="resist" id="btnResist">Ho resistito<small>Voglia superata · +15 XP</small></button>
+      <button class="btn" data-act="smoke">+1 sigaretta<small>−10 XP · −25 oltre il solito</small></button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="label">Oggi</div><div class="v num">${todayS}<small> / ${limit} ${p.goal?"obiettivo":"il tuo solito"}</small></div></div>
+      <div class="kpi"><div class="label">Sigarette evitate</div><div class="v num">${fmtInt(st.avoided)}</div></div>
+      <div class="kpi"><div class="label">Risparmiati</div><div class="v num">${eur(st.saved)}</div></div>
+      <div class="kpi"><div class="label">Voglie superate</div><div class="v num">${fmtInt(st.cravings)}<small> · oggi ${st.today.c}</small></div></div>
+    </div>
+    <div class="card stack">
+      <div class="row between"><div><div class="label">Livello ${lv}</div><div class="xp num" style="margin-top:3px">${fmtInt(st.xp)} XP</div></div><div class="small muted num">${fmtInt(b-st.xp)} XP al livello ${lv+1}</div></div>
+      <div class="bar"><span style="width:${pct}%"></span></div>
+    </div>
+    ${bodyCard(p,st)}
+    ${next?`<div class="card stack"><div class="label">Prossimo traguardo per il corpo</div>
+      <div class="row between"><h3>${esc(next[2])}</h3></div>
+      <div class="bar"><span style="width:${hp}%"></span></div>
+      <div class="small muted">Tra <span class="num">${shortDur(next[0]-st.streak)}</span> senza fumare · a ${next[1]}</div></div>`:""}
+    ${wish}
+  </div>`;
+}
+
+function viewSquadra(){
+  const p=S.player;
+  if(!p.group || !S.group){
+    if(p.group && !S.group) return `<div class="card empty">Carico la squadra…</div>`;
+    return `<div class="stack">
+      <div><h2>La tua squadra</h2><p class="muted" style="margin-top:6px">Le squadre sono private: entra solo chi ha il codice. Si vince insieme, ogni progresso conta.</p></div>
+      <form class="card stack" id="fCreate"><h3>Crea una squadra</h3>
+        <div class="field"><label for="gname">Nome della squadra</label><input class="input" id="gname" maxlength="28" placeholder="Es. Polmoni d'acciaio" required></div>
+        <button class="btn primary plain" type="submit">Crea e ottieni il codice</button></form>
+      <form class="card stack" id="fJoin"><h3>Entra con un codice</h3>
+        <div class="field"><label for="gcode">Codice invito</label><input class="input num" id="gcode" maxlength="6" placeholder="ABC123" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.2em" required></div>
+        <button class="btn plain" type="submit">Entra nella squadra</button><p class="small" id="joinErr" style="color:var(--warn)"></p></form>
+    </div>`;
+  }
+  const g=S.group, now=Date.now(), se=seasonOf(p,g,now);
+  const rows=S.members.map(m=>({m, ss:seasonStats(m,se,now), st:stats(m,now)})).sort((a,b)=>b.ss.xp-a.ss.xp);
+  const n=Math.max(1,rows.length);
+  const avoided=rows.reduce((a,r)=>a+r.ss.avoided,0), cravings=rows.reduce((a,r)=>a+r.ss.cravings,0);
+  const goalA=Math.round(rows.reduce((a,r)=>a+r.m.perDay,0)*SEASON_DAYS*0.5)||1, goalC=20*n;
+  const ended=se.ended;
+  const list=rows.map((r,i)=>`<div class="li ${r.m.id===S.pid?"me":""}"><div class="rank">${i+1}</div>${avatar(r.m)}
+    <div class="grow"><div class="row" style="gap:8px"><b>${esc(r.m.nick)}</b>${r.m.id===S.pid?'<span class="small muted">tu</span>':""}</div>
+    <div class="small muted num">${shortDur(r.st.streak)} senza fumare · ${fmtInt(r.ss.avoided)} evitate · ${r.ss.cravings} voglie</div></div>
+    <div style="text-align:right"><div class="xp num">${fmtInt(r.ss.xp)}</div>${lgPill(r.ss.xp)}</div></div>`).join("");
+  const podium = ended ? (()=>{ const t=rows.slice(0,3); const order=[1,0,2].filter(i=>t[i]); const hs={0:86,1:62,2:46}; const cols={0:"var(--gold)",1:"var(--silver)",2:"var(--bronze)"};
+    return `<div class="card stack"><div class="label">Stagione ${se.n} conclusa</div><h3>Il podio</h3>
+    <div class="podium">${order.map(i=>`<div class="pod">${avatar(t[i].m)}<b class="small">${esc(t[i].m.nick)}</b><div class="blk num" style="height:${hs[i]}px;color:${cols[i]}">${i+1}</div></div>`).join("")}</div>
+    <p class="small muted">Chiudendo la stagione le medaglie e i riconoscimenti vengono salvati nel profilo di tutti e ne parte una nuova da 30 giorni.</p>
+    <button class="btn primary plain" data-act="closeSeason">Chiudi la stagione ${se.n} e inizia la ${se.n+1}</button></div>`; })() : "";
+  return `<div class="stack">
+    <div class="row between"><div class="grow"><div class="label">Squadra privata</div><h2 style="margin-top:4px">${esc(g.name)}</h2></div>
+      <button class="chip num" data-act="copyInvite" style="letter-spacing:.15em">${esc(g.code)}</button></div>
+    <div class="card stack">
+      <div class="row between"><div class="label">Stagione ${se.n}</div><div class="small muted num">${ended?"Conclusa":"Giorno "+se.day+" di "+SEASON_DAYS}</div></div>
+      <div class="bar"><span style="width:${Math.min(100,se.day/SEASON_DAYS*100)}%"></span></div>
+      <div class="label" style="margin-top:6px">Obiettivi della squadra</div>
+      <div class="stack" style="gap:10px">
+        <div><div class="row between small"><span>Sigarette evitate insieme</span><span class="num muted">${fmtInt(avoided)} / ${fmtInt(goalA)}</span></div><div class="bar" style="margin-top:6px"><span style="width:${Math.min(100,avoided/goalA*100)}%"></span></div></div>
+        <div><div class="row between small"><span>Voglie superate insieme</span><span class="num muted">${cravings} / ${goalC}</span></div><div class="bar" style="margin-top:6px"><span style="width:${Math.min(100,cravings/goalC*100)}%"></span></div></div>
+      </div>
+    </div>
+    ${podium}
+    <div class="card"><div class="row between" style="margin-bottom:6px"><h3>Classifica</h3><span class="small muted">XP di stagione</span></div><div class="list">${list||'<div class="empty">Nessun membro ancora.</div>'}</div></div>
+    <div class="flat small"><b>Invita un amico:</b> mandagli l'invito con il link oppure il codice <b class="num">${esc(g.code)}</b>. ${rows.length<2?"Le sfide di squadra partono quando siete almeno in due.":""}
+      <div style="margin-top:8px"><button class="btn sm" data-act="copyInvite">Copia l'invito</button></div><input class="input small" id="inviteTxt" readonly hidden style="margin-top:8px"></div>
+    <p class="small muted center">La classifica premia il percorso, non chi fuma meno degli altri: XP da ore libere, voglie superate e missioni.</p>
+  </div>`;
+}
+
+function missionRow(m, kind){
+  const pct=Math.round(m.prog/m.need*100);
+  const right = m.claimed ? `<span class="xptag">fatta</span>` : m.done ? `<button class="claim" data-act="claim" data-key="${m.key}" data-xp="${m.xp}" data-kind="${kind}">Riscatta +${m.xp}</button>` : `<span class="xptag">+${m.xp} XP</span>`;
+  return `<div class="mis"><div class="check ${m.claimed?"ok":""}">${m.claimed?"✓":""}</div><div class="grow"><div>${esc(m.t)}</div>${m.need>1&&!m.claimed?`<div class="bar"><span style="width:${pct}%"></span></div><div class="small muted num" style="margin-top:3px">${m.prog} / ${m.need}</div>`:""}</div>${right}</div>`;
+}
+function viewSfide(){
+  const p=S.player, now=Date.now();
+  const dm=dailyMissions(p,now), pf=perfectDay(p,dm,now), wm=weeklyMissions(p,now), sm=seasonMissions(p,S.group,now);
+  const left=dayStart(now)+D-now, ws=addDays(weekStart(now),7)-now;
+  const fs=flashState(p,now);
+  const flash = !fs || fs.claimed ? `<div class="card"><div class="row between"><h3>Sfida lampo</h3><span class="small muted">${p.flashDone||0} completate</span></div>
+      <p class="small muted" style="margin-top:4px">Scegli quante ore resistere da adesso. Se fumi la sfida si interrompe, senza penalità.</p>
+      <div class="grid2" style="margin-top:12px">${FLASH.map(f=>`<button class="btn sm" data-act="flash" data-h="${f[0]}">${f[0]} ore <span class="xptag" style="margin-left:auto">+${f[1]}</span></button>`).join("")}</div></div>`
+    : `<div class="card stack"><div class="row between"><h3>Sfida lampo · ${fs.h} ore</h3><span class="xptag">+${FLASH.find(f=>f[0]===fs.h)[1]} XP</span></div>
+      ${fs.broken?`<p class="small muted">Interrotta da una sigaretta. Nessun problema: ripartine un'altra.</p><button class="btn sm" data-act="flashReset">Scegli una nuova sfida</button>`
+      : fs.done?`<p class="small">Completata. Te la sei guadagnata.</p><button class="claim" data-act="flashClaim">Riscatta +${FLASH.find(f=>f[0]===fs.h)[1]} XP</button>`
+      : `<div class="bar"><span style="width:${fs.pct}%"></span></div><div class="row between small"><span class="muted">Mancano <b class="num" data-tick="flash">${shortDur(fs.left)}</b></span><button class="linkbtn" data-act="flashReset">Annulla</button></div>`}</div>`;
+  let team="", duel="";
+  if(p.group && S.group){
+    const tc=teamChallenge(p,S.members,now);
+    team=`<div class="card"><div class="row between"><h3>Sfida di squadra</h3><span class="xptag">+${tc.xp} XP a testa</span></div>
+      <p class="muted small" style="margin-top:4px">Tutta la squadra sotto il proprio solito. Si vince insieme, si riscatta il giorno dopo.</p>
+      <div class="list" style="margin-top:8px">${tc.todayOk.map(o=>`<div class="li">${avatar(o.m,30)}<div class="grow">${esc(o.m.nick)}</div><span class="small ${o.ok?"":"muted"}">${o.ok?"in linea oggi":"oltre il solito"}</span></div>`).join("")}</div>
+      <div class="row between" style="margin-top:10px"><span class="small muted">Ieri: ${tc.eligible<2?"servono almeno 2 membri":tc.yAll?"tutti sotto il solito":"non tutti ce l'hanno fatta"}</span>
+      ${tc.claimed?'<span class="xptag">riscattata</span>':tc.yAll?`<button class="claim" data-act="claim" data-key="${tc.key}" data-xp="${tc.xp}" data-kind="g">Riscatta +${tc.xp}</button>`:""}</div></div>`;
+    const du=duels(p,S.members,now);
+    if(du.today){ const t=du.today, lead=t.a>t.b?"Sei avanti":t.a<t.b?"Sei dietro":"Pareggio";
+      duel=`<div class="card stack"><div class="row between"><h3>Duello del giorno</h3><span class="xptag">+${du.xp} XP a chi vince</span></div>
+        <p class="small muted">${esc(t.metric.t)}. Gli avversari cambiano ogni giorno, in pareggio vincete entrambi.</p>
+        <div class="row" style="justify-content:space-around;text-align:center">
+          <div class="stack" style="gap:6px;align-items:center">${avatar(t.me,44)}<b class="small">Tu</b><div class="xp num">${esc(t.metric.fmt(t.a))}</div></div>
+          <div class="label">vs</div>
+          <div class="stack" style="gap:6px;align-items:center">${avatar(t.op,44)}<b class="small">${esc(t.op.nick)}</b><div class="xp num">${esc(t.metric.fmt(t.b))}</div></div></div>
+        <div class="center small"><b>${lead}</b></div>
+        ${du.y?`<div class="row between flat small"><span>Ieri contro ${esc(du.y.op.nick)}: ${du.yWin?"hai vinto":"ha vinto lui"}</span>${du.claimed?'<span class="xptag">riscattato</span>':du.yWin?`<button class="claim" data-act="claim" data-key="${du.key}" data-xp="${du.xp}" data-kind="u">Riscatta +${du.xp}</button>`:""}</div>`:""}</div>`; }
+  } else team=`<div class="flat small">Entra in una squadra per sbloccare duelli, sfide di gruppo e campionati da 30 giorni. <button class="linkbtn" data-act="go" data-tab="squadra">Vai alla squadra</button></div>`;
+  return `<div class="stack">
+    <div><h2>Sfide</h2><p class="muted" style="margin-top:4px">Le missioni si completano da sole: quando sono pronte, riscatti gli XP.</p></div>
+    <div class="card"><div class="row between"><h3>Missioni di oggi</h3><span class="small muted num">${shortDur(left)} rimasti</span></div><div style="margin-top:4px">${dm.map(m=>missionRow(m,"d")).join("")}${missionRow(pf,"p")}</div></div>
+    ${flash}
+    ${duel}
+    <div class="card"><div class="row between"><h3>Sfide della settimana</h3><span class="small muted num">${shortDur(ws)} rimasti</span></div><div style="margin-top:4px">${wm.map(m=>missionRow(m,"w")).join("")}</div></div>
+    <div class="card"><div class="row between"><h3>Sfide di stagione</h3><span class="small muted num">stagione ${sm.se.n} · giorno ${Math.min(sm.se.day,SEASON_DAYS)}</span></div><div style="margin-top:4px">${sm.list.map(m=>missionRow(m,"s")).join("")}</div></div>
+    ${team}
+    <div class="card stack"><h3>Obiettivi personali</h3>
+      <form id="fGoal" class="stack">
+        <div class="grid2"><div class="field"><label for="goalN">Massimo al giorno</label><input class="input num" id="goalN" type="number" min="0" max="80" inputmode="numeric" value="${p.goal??""}" placeholder="${Math.max(0,p.perDay-2)}"></div>
+        <div class="field"><label for="wishCost">Desiderio (€)</label><input class="input num" id="wishCost" type="number" min="0" step="1" inputmode="decimal" value="${p.wish?.cost??""}" placeholder="150"></div></div>
+        <div class="field"><label for="wishName">Cosa vuoi comprarti con i soldi risparmiati</label><input class="input" id="wishName" maxlength="40" value="${esc(p.wish?.name??"")}" placeholder="Es. cuffie nuove"></div>
+        <button class="btn plain" type="submit">Salva obiettivi</button></form></div>
+  </div>`;
+}
+
+function chartSVG(vals, habit, labels){
+  const W=340, Hh=170, top=18, bot=22, left=4, right=4, n=vals.length;
+  const max=Math.max(habit, ...vals, 1)*1.15; const y=v=>top+(Hh-top-bot)*(1-v/max);
+  const bw=(W-left-right)/n; let s=`<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Sigarette fumate rispetto al tuo solito">`;
+  s+=`<line class="grid" x1="0" x2="${W}" y1="${Hh-bot}" y2="${Hh-bot}"/>`;
+  vals.forEach((v,i)=>{ const x=left+i*bw+bw*.18, w=bw*.64, yy=y(v), h=Math.max(v>0?2:0,Hh-bot-yy);
+    s+=`<rect class="b ${v>habit?"over":""}" x="${x.toFixed(1)}" y="${(Hh-bot-h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3"/>`;
+    if(n<=14) s+=`<text class="vt" x="${(x+w/2).toFixed(1)}" y="${(Hh-bot-h-4).toFixed(1)}" text-anchor="middle">${v}</text>`;
+    s+=`<text x="${(x+w/2).toFixed(1)}" y="${Hh-6}" text-anchor="middle">${labels[i]}</text>`; });
+  const hy=y(habit); s+=`<line class="hl" x1="0" x2="${W}" y1="${hy.toFixed(1)}" y2="${hy.toFixed(1)}"/><text x="${W-2}" y="${(hy-4).toFixed(1)}" text-anchor="end">solito ${fmtInt(habit)}</text>`;
+  return s+"</svg>";
+}
+function viewStats(){
+  const p=S.player, now=Date.now(), st=stats(p,now), mode=S.statMode;
+  let vals=[], labels=[], habit=p.perDay, title="";
+  const WD=["do","lu","ma","me","gi","ve","sa"], MO=["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+  if(mode==="giorni"){ for(let i=13;i>=0;i--){ const t=addDays(dayStart(now),-i); vals.push(dget(p,dk(t)).s); labels.push(i===0?"oggi":WD[new Date(t).getDay()]); } title="Ultimi 14 giorni"; }
+  else if(mode==="settimane"){ habit=p.perDay*7; for(let i=7;i>=0;i--){ const ws=addDays(weekStart(now),-7*i); let s=0; for(let j=0;j<7;j++) s+=dget(p,dk(addDays(ws,j))).s; vals.push(s); labels.push(i===0?"ora":new Date(ws).getDate()+"/"+(new Date(ws).getMonth()+1)); } title="Ultime 8 settimane"; }
+  else { const d0=new Date(now); habit=p.perDay*30; for(let i=5;i>=0;i--){ const m=new Date(d0.getFullYear(), d0.getMonth()-i, 1); let s=0; const end=new Date(m.getFullYear(), m.getMonth()+1, 1).getTime(); for(let t=m.getTime(); t<end; t=addDays(t,1)) s+=dget(p,dk(t)).s; vals.push(s); labels.push(MO[m.getMonth()]); } title="Ultimi 6 mesi"; }
+  const recs=[["Serie migliore",shortDur(st.best)],["Giorni a zero",st.zeroDays],["Giorni sotto il solito",st.underDays],["Sigarette fumate",fmtInt(st.smoked)],["Evitate",fmtInt(st.avoided)],["Risparmiati",eur(st.saved)],["Voglie superate",fmtInt(st.cravings)],["Missioni completate",st.missions],["XP persi fumando",fmtInt(p.penTot||0)]];
+  const tl=HEALTH.map(h=>{ const done=st.streak>=h[0]; const isNext=!done && HEALTH.find(x=>st.streak<x[0])===h;
+    return `<div class="tli ${done?"done":""} ${isNext?"next":""}"><div class="pt"></div><div><div class="when">${h[1]}${done?" · raggiunto":isNext?" · tra "+shortDur(h[0]-st.streak):""}</div><div>${esc(h[2])}</div></div></div>`; }).join("");
+  return `<div class="stack">
+    <div><h2>Statistiche</h2></div>
+    <div class="seg" role="group">${["giorni","settimane","mesi"].map(m=>`<button data-act="mode" data-mode="${m}" aria-pressed="${mode===m}">${m[0].toUpperCase()+m.slice(1)}</button>`).join("")}</div>
+    <div class="card"><div class="row between"><h3>${title}</h3><span class="small muted">sigarette</span></div><div class="chart" style="margin-top:10px">${chartSVG(vals,habit,labels)}</div></div>
+    <div class="kpis">${recs.map(r=>`<div class="kpi"><div class="label">${r[0]}</div><div class="v num" style="font-size:20px">${r[1]}</div></div>`).join("")}</div>
+    <div class="card"><h3>Benefici per la salute</h3><p class="small muted" style="margin:4px 0 14px">Tempi indicativi dall'ultima sigaretta, secondo le principali fonti sanitarie. Si riparte dall'ultima sigaretta segnata.</p><div class="tl">${tl}</div></div>
+  </div>`;
+}
+
+function medals(p){
+  const g=S.group; const out={gold:0,silver:0,bronze:0,awards:[]};
+  if(!g||!g.history) return out;
+  for(const h of g.history){ const i=(h.rank||[]).findIndex(r=>r.p===S.pid); if(i===0) out.gold++; else if(i===1) out.silver++; else if(i===2) out.bronze++;
+    for(const [k,v] of Object.entries(h.awards||{})) if(v===S.pid) out.awards.push({s:h.n, k}); }
+  return out;
+}
+const AWARD_NAMES={xp:"Più XP della stagione", cravings:"Più voglie superate", zero:"Più giorni a zero", avoided:"Più sigarette evitate"};
+function viewProfilo(){
+  const p=S.player, st=stats(p), lv=levelOf(st.xp), se=seasonOf(p,S.group), sx=seasonStats(p,se).xp, nl=nextLeague(sx), md=medals(p);
+  const earned=BADGES.filter(b=>p.badges&&p.badges[b.id]).length;
+  return `<div class="stack">
+    <div class="card row" style="gap:14px">${avatar(p,58)}<div class="grow"><h2>${esc(p.nick)}</h2><div class="row" style="gap:8px;margin-top:6px;flex-wrap:wrap"><span class="chip num">Livello ${lv}</span>${lgPill(sx)}<span class="small muted num">${fmtInt(st.xp)} XP</span></div></div></div>
+    <div class="card stack"><div class="row between"><div class="label">Lega · stagione ${se.n}</div><span class="small muted num">${fmtInt(sx)} XP</span></div>
+      <div class="row" style="gap:6px;flex-wrap:wrap">${LEAGUES.map(l=>`<span class="lg lg-${l[0]}" style="${league(sx)===l[0]?"":"opacity:.35"}">${l[0]}</span>`).join("")}</div>
+      ${nl?`<p class="small muted">${fmtInt(nl[1]-sx)} XP per salire in ${nl[0]}.</p>`:`<p class="small muted">Sei nella lega più alta.</p>`}</div>
+    <div class="card"><div class="row between"><h3>Badge</h3><span class="small muted num">${earned} / ${BADGES.length}</span></div>
+      <div class="badges" style="margin-top:14px">${BADGES.map(b=>`<div class="bdg ${p.badges&&p.badges[b.id]?"":"off"}" title="${esc(b.d)}"><div class="hex">${esc(b.s)}</div><div>${esc(b.n)}</div></div>`).join("")}</div></div>
+    <div class="card stack"><h3>Medaglie e riconoscimenti</h3>
+      <div class="row" style="gap:16px"><div class="row"><div class="medal" style="background:var(--gold)">${md.gold}</div><span class="small">Oro</span></div><div class="row"><div class="medal" style="background:var(--silver)">${md.silver}</div><span class="small">Argento</span></div><div class="row"><div class="medal" style="background:var(--bronze)">${md.bronze}</div><span class="small">Bronzo</span></div></div>
+      ${md.awards.length?md.awards.map(a=>`<div class="small">Stagione ${a.s} · <b>${AWARD_NAMES[a.k]||a.k}</b></div>`).join(""):`<p class="small muted">Si vincono a fine stagione con la squadra.</p>`}</div>
+    <form class="card stack" id="fProfile"><h3>Impostazioni</h3>
+      <div class="field"><label for="pNick">Nickname</label><input class="input" id="pNick" maxlength="20" value="${esc(p.nick)}" required></div>
+      <div class="field"><label>Colore</label><div class="swatches" id="pColors">${COLORS.map(c=>`<button type="button" class="sw" data-color="${c}" aria-pressed="${p.color===c}" style="background:${c}" aria-label="Colore"></button>`).join("")}</div></div>
+      <div class="grid2"><div class="field"><label for="pDay">Sigarette al giorno (prima)</label><input class="input num" id="pDay" type="number" min="1" max="80" value="${p.perDay}" required></div>
+      <div class="field"><label for="pPrice">Prezzo pacchetto (€)</label><input class="input num" id="pPrice" type="number" min="0" step="0.1" value="${p.price}" required></div></div>
+      <div class="field"><label for="pPack">Sigarette per pacchetto</label><input class="input num" id="pPack" type="number" min="1" max="50" value="${p.perPack}" required></div>
+      <button class="btn primary plain" type="submit">Salva</button></form>
+    ${p.group?`<button class="btn plain" data-act="leave">Esci dalla squadra</button>`:""}
+    <p class="small muted center">Nella squadra si vedono solo nickname e progressi. ${S.readOnly?"<br>Al momento non riesco a salvare i dati.":""}</p>
+  </div>`;
+}
+
+function viewOnboard(){
+  const code=joinFromHash();
+  return `<div class="stack">
+    <div style="padding:10px 0 4px"><div class="label">Benvenuto</div><h2 style="font-size:30px;margin-top:6px">Smettere è più facile in squadra.</h2>
+    <p class="muted" style="margin-top:8px">Cronometro, risparmio, sfide con gli amici. Ogni sigaretta costa XP, ma badge e record restano sempre.</p></div>
+    <form class="card stack" id="fOnboard">
+      <div class="field"><label for="oNick">Il tuo nickname</label><input class="input" id="oNick" maxlength="20" required placeholder="Come ti vedranno gli amici"></div>
+      <div class="field"><label>Colore</label><div class="swatches" id="oColors">${COLORS.map((c,i)=>`<button type="button" class="sw" data-color="${c}" aria-pressed="${i===0}" style="background:${c}" aria-label="Colore"></button>`).join("")}</div></div>
+      <div class="grid2"><div class="field"><label for="oDay">Sigarette al giorno</label><input class="input num" id="oDay" type="number" min="1" max="80" value="15" required></div>
+      <div class="field"><label for="oPrice">Prezzo pacchetto (€)</label><input class="input num" id="oPrice" type="number" min="0" step="0.1" value="6" required></div></div>
+      <div class="grid2"><div class="field"><label for="oPack">Per pacchetto</label><input class="input num" id="oPack" type="number" min="1" max="50" value="20" required></div>
+      <div class="field"><label for="oLast">Ultima sigaretta</label><select class="input" id="oLast"><option value="0">Adesso</option><option value="0.5">30 min fa</option><option value="1">1 ora fa</option><option value="3">3 ore fa</option><option value="8">8 ore fa</option><option value="24">Ieri</option><option value="72">3 giorni fa</option></select></div></div>
+      ${code?`<p class="small">Entrerai nella squadra con codice <b class="num">${esc(code)}</b>.</p>`:""}
+      <button class="btn primary plain" type="submit">Inizia</button></form>
+  </div>`;
+}
+
+
+/* ---------- corpo ---------- */
+function nowStage(ms){
+  if(ms<MIN) return ["Adesso","La nicotina arriva al cervello in circa 10 secondi e libera dopamina: è il sollievo che senti."];
+  if(ms<30*MIN) return ["Prima mezz'ora","Battito e pressione sono più alti del normale e i vasi sanguigni si restringono."];
+  if(ms<2*H) return ["Nelle prime ore","Il monossido di carbonio occupa parte dell'emoglobina: al sangue arriva meno ossigeno."];
+  if(ms<4*H) return ["Circa 2 ore dopo","La nicotina nel sangue si è dimezzata ed è qui che torna la voglia. È il momento dell'SOS."];
+  return null;
+}
+function bodyCard(p, st){
+  const n=st.today.s, life=n*20;
+  const stage=st.today.s>0 ? nowStage(st.streak) : null;
+  if(!n) return `<div class="card stack"><div class="label">Il tuo corpo oggi</div><h3>Zero sigarette finora.</h3>
+    <p class="small muted">Oggi il tuo corpo non ha ricevuto monossido di carbonio dal fumo né le sostanze cancerogene di una sigaretta. Ogni ora così il cuore lavora meno e il sangue trasporta più ossigeno.</p></div>`;
+  const rows=[
+    ["Vita stimata",`circa ${life>=60?Math.floor(life/60)+" h "+(life%60?life%60+" min":""):life+" min"}`,"In media ogni sigaretta costa circa 20 minuti di vita (University College London, 2025)."],
+    ["Sostanze",`oltre 7.000 × ${n}`,"Ogni sigaretta sprigiona oltre 7.000 sostanze chimiche, circa 70 delle quali cancerogene."],
+    ["Catrame",`fino a ${n*10} mg`,"Si deposita nei polmoni. Il limite di legge in UE è 10 mg a sigaretta."],
+    ["Monossido",`fino a ${n*10} mg`,"Si lega all'emoglobina molto più dell'ossigeno e riduce l'ossigeno nei tessuti."],
+    ["Nicotina",`circa ${n} mg`,"Accelera il cuore e alza la pressione: oggi è successo "+n+(n===1?" volta.":" volte.")],
+    ["Spesa",eur(n*st.perCig),"Soldi andati in fumo oggi."],
+  ];
+  const vs = n<p.perDay ? `<p class="small" style="color:var(--sage-deep)">Rispetto al tuo solito (${p.perDay}) hai risparmiato al corpo ${p.perDay-n} sigarette oggi: circa ${(p.perDay-n)*20} minuti di vita stimati.</p>`
+    : n>p.perDay ? `<p class="small" style="color:var(--warn)">Sei sopra il tuo solito di ${n-p.perDay}. Ogni sigaretta in più ora costa 25 XP: alla prossima voglia prova l'SOS.</p>` : "";
+  return `<div class="card stack"><div class="row between"><div class="label">Il tuo corpo oggi</div><span class="small muted num">${n} ${n===1?"sigaretta":"sigarette"}</span></div>
+    ${stage?`<div class="flat"><div class="label" style="color:var(--sage-deep)">${stage[0]} dall'ultima</div><p style="margin-top:4px">${stage[1]}</p></div>`:""}
+    <div class="list">${rows.map(r=>`<div class="li" style="align-items:flex-start"><div class="grow"><div class="row between"><b>${r[0]}</b><span class="xp num">${esc(r[1])}</span></div><div class="small muted" style="margin-top:2px">${esc(r[2])}</div></div></div>`).join("")}</div>
+    ${vs}
+    <p class="small muted">Valori indicativi da OMS, Istituto Superiore di Sanità e Direttiva UE 2014/40 sui limiti per sigaretta.</p></div>`;
+}
+
+/* ---------- render ---------- */
+const TABS=[["home","Home",'<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],["squadra","Friends",'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/>'],["sfide","Sfide",'<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/><path d="M12 13v4M8 20h8"/>'],["statistiche","Statistiche",'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>'],["profilo","Profilo",'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>']];
+function render(){
+  const ae=document.activeElement; if(ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && ae.closest("#root form") && S.loaded && S.player){ S.pendingRender=true; return; }
+  S.pendingRender=false;
+  const root=$("#root");
+  if(S.fatal){ root.innerHTML=topBar()+`<div class="card stack"><h3>Non riesco a salvare qui</h3><p class="muted">${esc(S.fatal)}</p></div>`; return; }
+  if(!S.loaded){ return; }
+  if(!S.player){ $("#tabs").hidden=true; $("#sosfab").hidden=true; root.innerHTML=topBar()+viewOnboard(); bindForms(); return; }
+  const v={home:viewHome, squadra:viewSquadra, sfide:viewSfide, statistiche:viewStats, profilo:viewProfilo}[S.tab]||viewHome;
+  root.innerHTML=topBar()+v();
+  const tabs=$("#tabs"); tabs.hidden=false;
+  tabs.innerHTML=`<nav>${TABS.map(t=>`<a href="#${t[0]}" ${S.tab===t[0]?'aria-current="page"':""}><svg viewBox="0 0 24 24">${t[2]}</svg>${t[1]}</a>`).join("")}</nav>`;
+  $("#sosfab").hidden=false;
+  bindForms();
+}
+function tick(){
+  if(!S.player) return; const st=stats(S.player);
+  const t=document.querySelector('[data-tick="timer"]'); if(t) t.innerHTML=timerHTML(st.streak);
+  const b=document.querySelector('[data-tick="best"]'); if(b) b.textContent=shortDur(st.best);
+  const pe=document.querySelector('[data-tick="pend"]'); if(pe) pe.textContent=st.pending;
+  const fl=document.querySelector('[data-tick="flash"]'); if(fl){ const fs=flashState(S.player); if(fs && fs.left<=0) render(); else if(fs) fl.textContent=shortDur(fs.left); }
+}
+
+/* ---------- forms ---------- */
+function bindSwatches(id){ const w=$(id); if(!w) return; w.addEventListener("click",e=>{ const b=e.target.closest(".sw"); if(!b) return; w.querySelectorAll(".sw").forEach(x=>x.setAttribute("aria-pressed", x===b)); }); }
+const swVal = id => ($(id+' [aria-pressed="true"]')||{}).dataset?.color || COLORS[0];
+function bindForms(){
+  const fo=$("#fOnboard"); if(fo){ bindSwatches("#oColors"); fo.onsubmit=async e=>{ e.preventDefault();
+    const now=Date.now(); const lastH=parseFloat($("#oLast").value)||0;
+    const p={nick:$("#oNick").value.trim().slice(0,20)||"Anonimo", color:swVal("#oColors"), perDay:Math.max(1,parseInt($("#oDay").value)||15),
+      price:Math.max(0,parseFloat($("#oPrice").value)||0), perPack:Math.max(1,parseInt($("#oPack").value)||20), start:now, last:now-lastH*H, best:0, freeH:0, xp:0,
+      d:{}, badges:{}, claims:{}, group:null, joined:null, mdone:0, wdone:0, goal:null, wish:null};
+    awardBadges(p, now); S.player=p; persist(p); const code=joinFromHash(); if(code) await joinGroup(code); render(); toast("Si parte. Ogni ora senza fumare vale 10 XP."); }; }
+  const fc=$("#fCreate"); if(fc) fc.onsubmit=async e=>{ e.preventDefault(); const name=$("#gname").value.trim(); if(!name) return; await createGroup(name); };
+  const fj=$("#fJoin"); if(fj) fj.onsubmit=async e=>{ e.preventDefault(); const c=$("#gcode").value.trim().toUpperCase(); const ok=await joinGroup(c); if(!ok){ const er=$("#joinErr"); if(er) er.textContent="Codice non trovato. Controlla le 6 lettere e numeri."; } };
+  const fg=$("#fGoal"); if(fg) fg.onsubmit=e=>{ e.preventDefault(); const gv=$("#goalN").value, wc=$("#wishCost").value, wn=$("#wishName").value.trim();
+    document.activeElement.blur(); const before=mutate(p=>{ p.goal = gv===""?null:Math.max(0,parseInt(gv)); p.wish = (wn||wc) ? {name:wn||"Il mio desiderio", cost:Math.max(0,parseFloat(wc)||0)} : null; }); undoable(before, "Obiettivi salvati"); };
+  const fp=$("#fProfile"); if(fp){ bindSwatches("#pColors"); fp.onsubmit=e=>{ e.preventDefault(); const vals={nick:$("#pNick").value.trim().slice(0,20)||S.player.nick, color:swVal("#pColors"),
+    perDay:Math.max(1,parseInt($("#pDay").value)||S.player.perDay), price:Math.max(0,parseFloat($("#pPrice").value)||0), perPack:Math.max(1,parseInt($("#pPack").value)||20)};
+    document.activeElement.blur(); undoable(mutate(p=>Object.assign(p,vals)), "Profilo salvato"); }; }
+}
+document.addEventListener("focusout",()=>setTimeout(()=>{ if(S.pendingRender){ const ae=document.activeElement; if(!(ae&&ae.closest&&ae.closest("#root form"))) render(); } },0));
+
+/* ---------- groups ---------- */
+async function createGroup(name){
+  if(S.readOnly){ toast("Non riesco a salvare: controlla la connessione e le regole di Firebase."); return; }
+  let code=genCode();
+  try{ for(let i=0;i<4;i++){ const s=await S.db.doc("groups/"+code).get(); if(!s.exists) break; code=genCode(); }
+    const now=Date.now();
+    await S.db.doc("groups/"+code).set({name:name.slice(0,28), code, created:now, by:S.pid, season:{n:1, start:dayStart(now)}, history:[]});
+    document.activeElement && document.activeElement.blur();
+    const before=mutate(p=>{ p.group=code; p.joined=now; }, {toast:true}); watchGroup(code); undoable(before, "Squadra creata. Codice "+code);
+  }catch(e){ if(e&&e.code==="permission-denied"){ S.readOnly=true; toast("Non riesco a salvare: controlla la connessione e le regole di Firebase."); } else toast("Non sono riuscito a creare la squadra, riprova."); }
+}
+async function joinGroup(code){
+  if(!/^[A-Z0-9]{6}$/.test(code||"")) return false;
+  try{ const s=await S.db.doc("groups/"+code).get(); if(!s.exists) return false;
+    document.activeElement && document.activeElement.blur();
+    const before=mutate(p=>{ p.group=code; p.joined=Date.now(); }, {toast:true}); S.pendingJoin=null; watchGroup(code); nav("squadra"); undoable(before, "Sei entrato in "+(s.data().name||"squadra")); return true;
+  }catch(e){ return false; }
+}
+function watchGroup(code){
+  if(code===S.groupCode) return;
+  if(S.unsubG) S.unsubG(); if(S.unsubM) S.unsubM(); S.unsubG=S.unsubM=null;
+  S.groupCode=code||null; S.group=null; S.members=[];
+  if(!code) return;
+  S.unsubG=S.db.doc("groups/"+code).onSnapshot(s=>{ S.group=s.exists?s.data():null; render(); }, ()=>{});
+  S.unsubM=S.db.collection("players").where("group","==",code).onSnapshot(s=>{ S.members=s.docs.map(d=>Object.assign({id:d.id}, d.data())); render(); }, ()=>{});
+}
+async function closeSeason(){
+  const g=S.group, now=Date.now(); if(!g) return; const se=seasonOf(S.player,g,now); if(!se.ended) return;
+  const rows=S.members.map(m=>({m, ss:seasonStats(m,se,now)}));
+  const top=(f)=>{ const r=rows.slice().sort((a,b)=>b.ss[f]-a.ss[f])[0]; return r && r.ss[f]>0 ? r.m.id : null; };
+  const rank=rows.slice().sort((a,b)=>b.ss.xp-a.ss.xp).map(r=>({p:r.m.id, x:r.ss.xp}));
+  const ref=S.db.doc("groups/"+g.code);
+  try{ let nextN=null;
+    await S.db.runTransaction(async tx=>{ const snap=await tx.get(ref); const cur=snap.data(); if(!cur || cur.season.n!==g.season.n) return;
+      const hist=(cur.history||[]).concat([{n:cur.season.n, start:cur.season.start, end:se.end, rank, awards:{xp:top("xp"), cravings:top("cravings"), zero:top("zero"), avoided:top("avoided")}}]).slice(-12);
+      tx.set(ref, Object.assign({}, cur, {history:hist, season:{n:cur.season.n+1, start:dayStart(now)}})); nextN=cur.season.n+1; });
+    if(nextN) toast("Stagione chiusa. Parte la "+nextN);
+  }catch(e){ toast("Non sono riuscito a chiudere la stagione."); }
+}
+
+function joinFromHash(){ if(S.pendingJoin) return S.pendingJoin; const m=/^#join-([A-Za-z0-9]{6})$/.exec(location.hash||""); return m?m[1].toUpperCase():null; }
+
+/* ---------- SOS ---------- */
+let sosTimers=[];
+function openSOS(){
+  mutate((p,now)=>{ const e=day(p,dk(now)); e.o=(e.o||0)+1; if(e.o<=3){ e.x+=5; p.xp=(p.xp||0)+5; } });
+  const st=stats(S.player); const end=Date.now()+3*MIN;
+  $("#modal").innerHTML=`<div class="modal" role="dialog" aria-label="SOS"><div class="app stack">
+    <div class="row between" style="padding-top:10px"><div class="label">SOS voglia</div><button class="linkbtn" data-act="sosClose">Chiudi</button></div>
+    <h2 style="font-size:26px">Respira con il cerchio. La voglia passa in pochi minuti.</h2>
+    <div class="breath" id="breath"><div class="c"></div><div class="c2"></div><span id="bTxt">Inspira</span></div>
+    <div class="center num" style="font-family:var(--mono);font-size:22px" id="sosLeft">3:00</div>
+    <div class="flat stack" style="gap:8px"><div class="label">Mentre aspetti</div>
+      <div>Bevi un bicchiere d'acqua fredda.</div><div>Alzati e cammina per cinque minuti.</div><div>Scrivi a qualcuno della tua squadra.</div><div>Lavati i denti o mastica una gomma.</div></div>
+    <div class="card stack"><div class="label">Quello che hai già costruito</div>
+      <div class="row between"><span>Senza fumare</span><b class="num">${shortDur(st.streak)}</b></div>
+      <div class="row between"><span>Risparmiati</span><b class="num">${eur(st.saved)}</b></div>
+      ${S.player.wish?`<div class="row between"><span>${esc(S.player.wish.name)}</span><b class="num">${Math.min(100,Math.round(st.saved/(S.player.wish.cost||1)*100))}%</b></div>`:""}</div>
+    <div class="actions"><button class="btn primary" data-act="sosWin">Ho resistito<small>+15 XP</small></button><button class="btn" data-act="sosLose">Ho fumato<small>−10 XP, poi si riparte</small></button></div>
+  </div></div>`;
+  document.body.style.overflow="hidden";
+  const br=$("#breath"), bt=$("#bTxt");
+  const cycle=()=>{ br.className="breath in"; bt.textContent="Inspira";
+    sosTimers.push(setTimeout(()=>{ br.className="breath hold"; bt.textContent="Trattieni"; },4000));
+    sosTimers.push(setTimeout(()=>{ br.className="breath out"; bt.textContent="Espira"; },8000)); };
+  requestAnimationFrame(()=>{ br.className="breath"; requestAnimationFrame(cycle); });
+  sosTimers.push(setInterval(cycle,14000));
+  sosTimers.push(setInterval(()=>{ const l=Math.max(0,end-Date.now()); const el=$("#sosLeft"); if(el) el.textContent=l>0?Math.floor(l/MIN)+":"+pad(Math.floor(l%MIN/1000)):"Passata. Ce l'hai fatta?"; },500));
+}
+function closeSOS(){ sosTimers.forEach(t=>{clearTimeout(t);clearInterval(t);}); sosTimers=[]; $("#modal").innerHTML=""; document.body.style.overflow=""; }
+
+/* ---------- events ---------- */
+document.addEventListener("click", e=>{
+  const ta=e.target.closest(".tabs a"); if(ta){ e.preventDefault(); nav(ta.getAttribute("href").slice(1)); return; }
+  const el=e.target.closest("[data-act]"); if(!el) return; const a=el.dataset.act;
+  if(a==="smoke") smoke(el);
+  else if(a==="resist") resist(el);
+  else if(a==="sos"){ openSOS(); try{ history.pushState({tab:S.tab,m:"sos"},"",location.hash); }catch(err){} }
+  else if(a==="sosClose") closeModal();
+  else if(a==="sosWin"){ closeModal(); resist($("#btnResist")); }
+  else if(a==="sosLose"){ closeModal(); smoke(); }
+  else if(a==="claim") claim(el.dataset.key, parseInt(el.dataset.xp), el.dataset.kind, el);
+  else if(a==="flash"){ const h=parseInt(el.dataset.h); undoable(mutate((p,now)=>{ p.flash={start:now, h}; }), "Sfida lampo partita: "+h+" ore"); }
+  else if(a==="flashReset"){ undoable(mutate(p=>{ p.flash=null; }), "Sfida lampo annullata"); }
+  else if(a==="flashClaim"){ const fs=flashState(S.player); if(!fs||!fs.done) return; const xp=FLASH.find(f=>f[0]===fs.h)[1];
+    const before=mutate((p,now)=>{ p.flash=null; p.flashDone=(p.flashDone||0)+1; p.xp=(p.xp||0)+xp; const e=day(p,dk(now)); e.x+=xp; e.fl=(e.fl||0)+1; }, {toast:true}); floatXP("+"+xp+" XP", el); undoable(before, "Sfida lampo completata · +"+xp+" XP"); }
+  else if(a==="mode"){ S.statMode=el.dataset.mode; render(); }
+  else if(a==="go"){ nav(el.dataset.tab); }
+  else if(a==="closeSeason") closeSeason();
+  else if(a==="leave"){ if(el.dataset.confirm){ undoable(mutate(p=>{ p.group=null; p.joined=null; }), "Sei uscito dalla squadra"); watchGroup(null); } else { el.dataset.confirm="1"; el.textContent="Tocca di nuovo per confermare"; } }
+  else if(a==="copyInvite"){ const g=S.group; if(!g) return; const link=location.origin+location.pathname+"#join-"+g.code; const txt=`Entra nella mia squadra "${g.name}" su NO SMOKE: ${link} (codice ${g.code})`;
+    const fb=()=>{ const i=$("#inviteTxt"); if(i){ i.hidden=false; i.value=txt; i.select(); } toast("Copia il testo qui sotto"); };
+    try{ navigator.clipboard.writeText(txt).then(()=>toast("Invito copiato"), fb); }catch(err){ fb(); } }
+});
+const VIEWS=["home","squadra","sfide","statistiche","profilo"];
+function routeHash(){
+  S.pendingJoin=joinFromHash();
+  const h=(location.hash||"").slice(1); S.tab = VIEWS.includes(h) ? h : (lsGet("ns_tab")||"home");
+  try{ history.replaceState({root:1},"",location.pathname+location.search); history.pushState({tab:S.tab},"","#"+S.tab); }catch(e){}
+  render();
+}
+function nav(tab){
+  if(!VIEWS.includes(tab)) return;
+  if(tab===S.tab){ window.scrollTo(0,0); return; }
+  S.tab=tab; lsSet("ns_tab",tab); try{ history.pushState({tab},"","#"+tab); }catch(e){}
+  render(); window.scrollTo(0,0);
+}
+function closeModal(){ closeSOS(); if(history.state && history.state.m==="sos"){ try{ history.back(); }catch(e){} } }
+window.addEventListener("popstate", e=>{
+  const st=e.state;
+  if($("#modal").innerHTML) closeSOS();
+  if(!st || st.root){ S.tab="home"; try{ history.pushState({tab:"home"},"","#home"); }catch(err){} }
+  else S.tab=st.tab||"home";
+  lsSet("ns_tab",S.tab); render(); window.scrollTo(0,0);
+});
+
+/* ---------- boot ---------- */
+async function boot(){
+  routeHash();
+  if(!window.firebase || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith("INCOLLA")){ S.fatal="Manca la configurazione di Firebase: incolla i dati della tua app web in FIREBASE_CONFIG dentro index.html."; S.loaded=true; render(); return; }
+  try{ firebase.initializeApp(FIREBASE_CONFIG); }catch(e){}
+  const fs=firebase.firestore();
+  try{ fs.enablePersistence({synchronizeTabs:true}).catch(()=>{}); }catch(e){}
+  S.db=fs;
+  let u;
+  try{ u=(await firebase.auth().signInAnonymously()).user; }
+  catch(e){ S.fatal="Accesso non riuscito. In Firebase attiva il metodo di accesso Anonimo."; S.loaded=true; render(); return; }
+  S.pid=u.uid;
+  const slow=setTimeout(()=>{ if(!S.loaded){ $("#boot") && ($("#boot").textContent="I dati ci stanno mettendo un po' ad arrivare. Controlla la connessione."); } },10000);
+  S.db.doc("players/"+S.pid).onSnapshot(s=>{
+    clearTimeout(slow);
+    if(s.exists) S.player=s.data();
+    S.loaded=true;
+    if(S.player){ watchGroup(S.player.group); const jc=joinFromHash(); if(jc && !S.player.group) joinGroup(jc); }
+    render();
+  }, e=>{ clearTimeout(slow); S.loaded=true; S.fatal=e&&e.code==="permission-denied" ? "Firebase ha rifiutato la lettura: controlla di aver incollato le regole di Firestore." : "Non riesco a raggiungere i dati salvati. Riapri l'app tra poco."; render(); });
+}
+setInterval(tick,1000);
+setInterval(()=>{ if(!S.player) return; const p=clone(S.player); const fresh=awardBadges(p); if(fresh.length){ mutate(q=>{}); } else if(!document.querySelector("#root form :focus") && !$("#modal").innerHTML) render(); },60000);
+boot();
+})();
+</script>
+
+</body>
+</html>
